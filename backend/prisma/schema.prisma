@@ -60,13 +60,10 @@ model ProjectMember {
   id        String   @id @default(uuid())
   userId    String
   projectId String
-  role      UserRole @default(MEMBER)
   createdAt DateTime @default(now())
 
   user    User    @relation(fields: [userId], references: [id])
   project Project @relation(fields: [projectId], references: [id])
-
-  @@unique([userId, projectId])
 }
 
 model Task {
