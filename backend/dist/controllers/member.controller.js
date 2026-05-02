@@ -1,15 +1,12 @@
-import type { Response } from "express";
-import type { AuthRequest } from "../middlewares/auth.middleware.js";
 import { prisma } from "../utils/prismaClient.js";
-
-export const addMember = async (req: AuthRequest, res: Response) => {
+export const addMember = async (req, res) => {
     try {
         const { projectId } = req.params;
         const { email } = req.body;
         const userId = req?.user?.id;
         const project = await prisma.project.findFirst({
             where: {
-                id: projectId as string,
+                id: projectId,
                 ownerId: userId,
             },
         });
@@ -33,7 +30,7 @@ export const addMember = async (req: AuthRequest, res: Response) => {
         const existingMember = await prisma.projectMember.findFirst({
             where: {
                 userId: user.id,
-                projectId: projectId as string,
+                projectId: projectId,
             },
         });
         if (existingMember) {
@@ -46,28 +43,28 @@ export const addMember = async (req: AuthRequest, res: Response) => {
         await prisma.projectMember.create({
             data: {
                 userId: user.id,
-                projectId: projectId as string,
+                projectId: projectId,
             },
         });
         res.status(200).json({
             success: true,
             message: "Member added to the project successfully",
         });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             message: "Error while adding member to the project",
         });
     }
 };
-
-export const removeMember = async (req: AuthRequest, res: Response) => {
+export const removeMember = async (req, res) => {
     try {
         const { projectId, memberId } = req.params;
         const userId = req?.user?.id;
         const project = await prisma.project.findFirst({
             where: {
-                id: projectId as string,
+                id: projectId,
                 ownerId: userId,
             },
         });
@@ -80,8 +77,8 @@ export const removeMember = async (req: AuthRequest, res: Response) => {
         }
         const member = await prisma.projectMember.findFirst({
             where: {
-                userId: memberId as string,
-                projectId: projectId as string,
+                userId: memberId,
+                projectId: projectId,
             },
         });
         if (!member) {
@@ -98,21 +95,21 @@ export const removeMember = async (req: AuthRequest, res: Response) => {
             success: true,
             message: "Member removed from the project successfully",
         });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             message: "Error while removing member from the project",
         });
     }
 };
-
-export const listMembers = async (req: AuthRequest, res: Response) => {
+export const listMembers = async (req, res) => {
     try {
         const { projectId } = req.params;
         const userId = req?.user?.id;
         const project = await prisma.project.findFirst({
             where: {
-                id: projectId as string,
+                id: projectId,
                 OR: [{ ownerId: userId }, { members: { some: { userId } } }],
             },
         });
@@ -124,7 +121,7 @@ export const listMembers = async (req: AuthRequest, res: Response) => {
             return;
         }
         const members = await prisma.projectMember.findMany({
-            where: { projectId: projectId as string },
+            where: { projectId: projectId },
             include: { user: true },
         });
         const memberList = members.map((member) => ({
@@ -136,10 +133,12 @@ export const listMembers = async (req: AuthRequest, res: Response) => {
             success: true,
             members: memberList,
         });
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({
             success: false,
             message: "Error while fetching project members",
         });
     }
 };
+//# sourceMappingURL=member.controller.js.map
